@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Overlay Timer TikTok</title>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
+<!-- Import de Socket.io pour écouter le serveur en temps réel -->
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+<style>
+body {
+  margin: 0;
+  background: transparent;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+}
+
+#timerContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#timerBox {
+  position: relative;
+  background: rgba(0,0,0,0.45);
+  padding: 20px 50px;
+  border-radius: 30px;
+  backdrop-filter: blur(6px);
+  border: 3px solid rgba(255,255,255,0.15);
+  overflow: hidden;
+  min-width: 500px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+#bgImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.35;
+  z-index: 0;
+}
+
+#timer {
+  position: relative;
+  z-index: 2;
+  font-size: 110px;
+  font-weight: bold;
+  font-family: 'Luckiest Guy', sans-serif;
+  text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 40px #00ffff;
+}
+
+#info {
+  font-size: 22px;
+  opacity: 0.95;
+  margin-top: 15px;
+  font-family: Arial, sans-serif;
+  text-shadow: 1px 1px 3px black;
+}
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+.pop { animation: pop 0.25s ease; }
+</style>
+</head>
+<body>
+
+<div id="timerContainer">
+  <div id="timerBox">
+    <img id="bgImage" src="" alt="">
+    <div id="timer">00:05:00</div>
+  </div>
+</div>
+
+<div id="info">1 pièce = 5 secondes</div>
+
+<script>
+let timeLeft = 300;
+let timerInterval = null;
+const timerEl = document.getElementById('timer');
+const infoEl = document.getElementById('info');
+const bgImageEl = document.getElementById('bgImage');
+const timerBoxEl = document.getElementById('timerBox');
+
+// Connexion au serveur Node.js local
+const socket = io('http://localhost:3000');
+
+function updateTimer() {
+  const h = Math.floor(timeLeft / 3600);
+  const m = Math.floor((timeLeft % 3600) / 60);
+  const s = timeLeft % 60;
+  timerEl.innerText = 
+    String(h).padStart(2,'0') + ':' + 
+    String(m).padStart(2,'0') + ':' + 
+    String(s).padStart(2,'0');
+}
+
+function triggerPop() {
+  timerEl.classList.remove('pop');
+  void timerEl.offsetWidth;
+  timerEl.classList.add('pop');
+}
+
+// Réception des ordres du serveur en temps réel
+socket.on('update_timer', (data) => {
+  if (data.timeLeft !== undefined) {
+    timeLeft = data.timeLeft;
+    updateTimer();
+  }
+  if (data.triggerPop) triggerPop();
+  if (data.infoText) infoEl.innerText = data.infoText;
+  
+  // Application des styles dynamiques depuis la télécommande
+  if (data.styles) {
+    timerEl.style.color = data.styles.timerColor;
+    timerEl.style.fontFamily = data.styles.timerFont;
+    timerEl.style.textShadow = `0 0 10px ${data.styles.timerEffect}, 0 0 20px ${data.styles.timerEffect}, 0 0 40px ${data.styles.timerEffect}`;
+    
+    infoEl.style.color = data.styles.infoColor;
+    infoEl.style.fontFamily = data.styles.infoFont;
+    
+    timerBoxEl.style.background = data.styles.bgBoxColor;
+    timerBoxEl.style.borderRadius = data.styles.bgRadius + "px";
+    if (data.styles.bgImage) bgImageEl.src = data.styles.bgImage;
+  }
+});
+
+// Décompte autonome (s'arrête à 0)
+setInterval(() => {
+  if (timeLeft > 0) {
+    timeLeft--;
+    updateTimer();
+  }
+}, 1000);
+
+updateTimer();
+</script>
+</body>
+</html>
