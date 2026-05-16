@@ -4,10 +4,6 @@ on:
   push:
     branches: ["main"]
 
-# Force GitHub à utiliser le moteur Node 24 pour éviter les erreurs d'obsolescence
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
-
 permissions:
   contents: read
   pages: write
@@ -21,21 +17,18 @@ jobs:
   deploy:
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }} # Correction ici : un point au lieu de deux-points
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # Reste en v4 car elle est compatible
 
       - name: Setup Pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5 # Mis à jour en v5 pour Node 24+
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: github-pages
-          path: '.'
+        uses: actions/upload-artifact@v4 # Reste en v4 car elle est compatible
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v4 # Reste en v4 car elle est compatible
