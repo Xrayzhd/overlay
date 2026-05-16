@@ -4,6 +4,10 @@ on:
   push:
     branches: ["main"]
 
+# CRUCIAL : On force le runner à utiliser Node 24 pour que la v5 de configure-pages fonctionne !
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 permissions:
   contents: read
   pages: write
@@ -21,14 +25,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4 # Reste en v4 car elle est compatible
+        uses: actions/checkout@v4
 
       - name: Setup Pages
-        uses: actions/configure-pages@v5 # Mis à jour en v5 pour Node 24+
+        uses: actions/configure-pages@v5 # Demande Node 24
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4 # Reste en v4 car elle est compatible
+        uses: actions/upload-artifact@v4
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4 # Reste en v4 car elle est compatible
+        uses: actions/deploy-pages@v4
