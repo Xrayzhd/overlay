@@ -2,9 +2,9 @@ name: Deploy Overlay to GitHub Pages
 
 on:
   push:
-    branches: ["main"] # Se déclenche dès que tu envoies du code sur la branche main
+    branches: ["main"]
 
-# Force GitHub à utiliser le moteur Node 24 pour éviter les erreurs d'obsolescence de 2026
+# Force GitHub à utiliser le moteur Node 24 pour éviter les erreurs d'obsolescence
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
@@ -21,7 +21,7 @@ jobs:
   deploy:
     environment:
       name: github-pages
-      url: ${{ steps: deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url }} # Correction ici : un point au lieu de deux-points
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -34,7 +34,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: github-pages
-          path: '.' # Envoie tout le dossier (contenant overlay.html)
+          path: '.'
 
       - name: Deploy to GitHub Pages
         id: deployment
